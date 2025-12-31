@@ -1,0 +1,39 @@
+#minikube status
+
+#minikube start
+
+#kubectl get pods
+
+##Crear pods cli
+
+#kubectl run name --image=nginx:alpine se puede agregar puerto , sino por defecto 8080
+
+
+#kubectl describe pod name
+
+#kubectl get po (shortname)
+
+Ver todo
+#kubectl api-resources
+
+borrar pods
+#kubectl delete pod name name2 name3
+
+ver pod seleccionado
+#kubectl get pod name
+
+obtener manifest
+#kubectl get pod name -o yaml/json
+
+#kubectl describe pod podtest 
+
+#docker ps -l
+
+#docker ps -f=name=gcr.io/k8s-minikube/kicbase:v0.0.48
+
+
+#kubectl port-forward <pod-name> 7000:<pod-port>
+
+
+Acceder a la terminal del contenedor
+# kubectl exec -ti podtest -- sh
