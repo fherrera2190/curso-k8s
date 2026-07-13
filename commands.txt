@@ -1,3 +1,49 @@
+IPC inter process comunication
+
+Sirve para compartir informacion entre procesos
+
+Procesos de un contenedor no puede ver los procesos de otro contenedor
+
+CGROUPS (control groups)
+Sirve para limitar los recursos de los contenedores
+Ram, cpu, i/o
+
+Network
+Cada contenedor tiene su propia network namespace
+Tiene una ip unica
+
+Mount 
+Cada contenedor tiene su propio filesystem
+El mount permite que los contenedores compartan archivos entre si
+a menos que se compartan volumes
+
+PID 
+Cada proceso tiene su propio id de proceso
+
+USER
+
+UTS Unix Time Sharing
+Cada contenedor tiene su propio hostname
+
+
+En kubernetes la unidad minima de ejecucion es el pod
+
+Porque?
+
+Por que un pod puede tener multiples contenedores y estos comparten recursos
+
+LXC (Linux Containers) Antes de docker
+
+Cada contenedor es un lxc y cadana uno de ellos tiene su propia red, su propio filesystem, su propio proceso, su propio usuario, su propio hostname, su propio mount, su propio pid, su propio ipc, su propio cgroup, su propio network namespace, su propio user namespace, su propio uts namespace, su propio cgroup namespace, su propio time namespace, su propio cgroup namespace, su propio time namespace
+
+A raiz de eso nacio docker e incluyo bridge network
+
+Pod 
+es compartir namespace entre contenedores
+kubernetes compart IPC Network y UTS
+
+
+
 #minikube status
 
 #minikube start
@@ -8,7 +54,7 @@
 
 #kubectl run name --image=nginx:alpine se puede agregar puerto , sino por defecto 8080
 
-
+#Describir pod
 #kubectl describe pod name
 
 #kubectl get po (shortname)
@@ -34,6 +80,84 @@ obtener manifest
 
 #kubectl port-forward <pod-name> 7000:<pod-port>
 
+nginx:alpine por defautl usa el puerto 80 -> #kubectl port-forward <pod-name> 7000:80
+
+Video 32
 
 Acceder a la terminal del contenedor
 # kubectl exec -ti podtest -- sh
+
+cd /usr/share/nginx/html/
+
+cat index.html
+
+echo ":)" > index.html
+
+cat index.html
+
+
+# kubectl exec -ti podtest -- sh
+
+Video 33
+
+kubectl logs podtest
+
+Para ver en vivo los logs
+
+kubectl logs -f podtest
+
+
+Video 34
+
+kubectl api-versions
+
+#En la carpeta kubernetes/pods
+kubectl apply -f pod.yaml
+
+kubectl delete -f pod.yaml
+
+
+Video 35
+
+Linux
+docker run --net host -ti python:3.6-alpine sh
+
+Window
+docker run -p 8081:8081 -ti python:3.6-alpine sh
+
+# python -m http.server 8081
+
+kubectl apply -f doscontenedores.yaml
+
+kubectl events pod doscontenedores
+
+kubectl logs doscontenedores -c cont1
+kubectl logs doscontenedores -c cont2
+
+#Video 36
+
+kubectl logs doscontenedores -c cont2
+kubectl exec -ti doscontenedores -- sh
+
+#instalar curl
+apk add -U curl
+
+curl localhost:8082
+
+kubectl delete -f doscontenedores.yaml
+kubectl apply -f doscontenedores.yaml
+
+#Seleccionar default
+kubectl exec -it doscontenedores -- sh
+#Seleccionar contenedor
+kubectl exec -it doscontenedores -c cont1 -- sh
+
+apk add -U curl
+curl localhost:8082
+curl localhost:8083
+
+#Video 37
+
+kubectl apply -f labels.yaml
+kubectl get pods -l app=back
+kubectl get pods -l env=dev

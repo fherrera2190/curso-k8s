@@ -10,13 +10,21 @@ spec:
         [
           "sh",
           "-c",
-          'echo "contenedor 1" > index.html && python -m http.server 8082',
+          'echo "contenedor1" > index.html && python -m http.server 8082',
         ]
     - name: cont2
       image: python:3.6-alpine
+      #con error
+      # command:
+      #   [
+      #     "sh",
+      #     "-c",
+      #     'echo "contenedor2" > index.html && python -m http.server 8082',
+      #   ]
+      #Sin error de puerto
       command:
         [
           "sh",
           "-c",
-          'echo "contenedor 2" > index.html && python -m http.server 8082',
+          'echo "contenedor2" > index.html && python -m http.server 8083',
         ]
