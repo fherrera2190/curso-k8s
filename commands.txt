@@ -159,5 +159,96 @@ curl localhost:8083
 #Video 37
 
 kubectl apply -f labels.yaml
+kubectl get pods -l app=front
 kubectl get pods -l app=back
 kubectl get pods -l env=dev
+
+#Video 38
+Problemas
+
+los pods no hacen self healing
+los pods no pueden actualizarse a si mismos
+
+kubectl apply -f test.yaml
+
+solucion crear objeto replicaset
+
+#Video 39 (replicaset)
+
+Como funcionan?
+
+Es un objeto separado al pod que esta a un nivel mas alto el cual crea pods y los gestiona
+
+se define un template y la cantidad de replicas que quiero
+
+Si un pod muere el replicaset lo reemplaza
+
+los labels son importante para que el replicaset pueda identificar los pods
+
+Cuando el replicaset crea los pods, va a colocar en la metadata del pod ownwer reference que es el replicaset que lo creo
+
+El owner lo coloca el objeto de mas alto nivel
+
+#Video 40 (replicaset)
+
+tiene 
+apiVersion: apps/v1
+
+por que API Group es apps
+
+el kind es el tipo de objeto
+
+kubectl api-resources
+
+kubectl apply -f rs.yaml
+
+#Video 41 (replicaset)
+
+
+kubectl delete pod XXXXX
+kubectl apply -f rs.yaml
+
+#Video 42 (replicaset)
+
+kubectl describe rs rs -o yaml
+kubectl get rs -o yaml
+kubectl get pod rs-test-7mxsr -o yaml
+
+#Video 43 (replicaset)
+
+kubectl delete -f rs.yaml
+
+kubectl run podtest1 --image=nginx:alpine
+kubectl run podtest2 --image=nginx:alpine
+
+kubectl label pods podtest1 app=pod-label
+kubectl label pods podtest2 app=pod-label
+
+kubectl apply -f rs.yaml
+
+replicaset adopta los pods existentes
+
+kubectl delete pod podtest2
+
+#Video 44 (Problemas replicaset)
+
+Replica set debe mantener la cantidad de pods especificada
+
+Que pasa si quiero cambiar la imagen? o quiero hacer cambios en el pod?
+
+
+El replicaset solo mira el numero de pods y el label
+
+Si se requieren cambios no se puede editar el replicaset, se debe eliminar y crear uno nuevo
+
+kubectl get pods
+
+kubectl get rs rs-test -o yaml
+
+kubectl describe pod rs-test-f85zp
+
+Replicaset no sirve para actualizar los pods, pero si podria eliminarlos y volver a crear
+
+Solucion a esto es el objeto de mayor nivel "deployment"
+deployment->replicaset->pods
+

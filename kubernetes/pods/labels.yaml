@@ -21,3 +21,15 @@ spec:
   containers:
     - name: cont1
       image: nginx:alpine
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: podtest4
+  labels:
+    app: back
+    env: dev
+spec:
+  containers:
+    - name: cont1
+      image: nginx:alpine
