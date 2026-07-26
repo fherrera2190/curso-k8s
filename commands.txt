@@ -252,3 +252,305 @@ Replicaset no sirve para actualizar los pods, pero si podria eliminarlos y volve
 Solucion a esto es el objeto de mayor nivel "deployment"
 deployment->replicaset->pods
 
+
+#Video46
+kubectl api-resources
+
+kubectl apply -f dep.yaml
+
+kubectl get deployment
+
+# 
+kubectl get deployment --show-labels
+
+# Sirve 
+ kubectl rollout status deployment deployment-test
+
+#Video47
+
+Fernando@Negra MINGW64 /d/Programacion/kubernetes/curso-k8s/kubernetes/deployment (main)
+$ kubectl get rs
+NAME                         DESIRED   CURRENT   READY   AGE
+deployment-test-65b49fdf48   3         3         3       6m35s
+
+Fernando@Negra MINGW64 /d/Programacion/kubernetes/curso-k8s/kubernetes/deployment (main)
+$ kubectl get rs --show-labels
+NAME                         DESIRED   CURRENT   READY   AGE     LABELS
+deployment-test-65b49fdf48   3         3         3       6m53s   app=front,pod-template-hash=65b49fdf48
+
+$ kubectl get pods --show-labels
+NAME                               READY   STATUS    RESTARTS   AGE     LABELS
+deployment-test-65b49fdf48-2d5wh   1/1     Running   0          7m32s   app=front,pod-template-hash=65b49fdf48
+deployment-test-65b49fdf48-d9lnv   1/1     Running   0          7m32s   app=front,pod-template-hash=65b49fdf48
+deployment-test-65b49fdf48-d9zzq   1/1     Running   0          7m32s   app=front,pod-template-hash=65b49fdf48
+
+
+Fernando@Negra MINGW64 /d/Programacion/kubernetes/curso-k8s/kubernetes/deployment (main)
+$ kubectl get  deployment deployment-test -o yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"labels":{"app":"front"},"name":"deployment-test","namespace":"default"},"spec":{"replicas":3,"selector":{"matchLabels":{"app":"front"}},"template":{"metadata":{"labels":{"app":"front"}},"spec":{"containers":[{"image":"nginx:alpine","name":"nginx","ports":[{"containerPort":80}]}]}}}}
+  creationTimestamp: "2026-07-26T03:05:53Z"
+  generation: 1
+  labels:
+    app: front
+  name: deployment-test
+  namespace: default
+  resourceVersion: "6660"
+  uid: f2d2953d-322a-4108-a724-7f0a22c58f71
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 3
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: front
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: front
+    spec:
+      containers:
+      - image: nginx:alpine
+        imagePullPolicy: IfNotPresent
+        name: nginx
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status:
+  availableReplicas: 3
+  conditions:
+  - lastTransitionTime: "2026-07-26T03:06:38Z"
+    lastUpdateTime: "2026-07-26T03:06:38Z"
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2026-07-26T03:05:53Z"
+    lastUpdateTime: "2026-07-26T03:06:38Z"
+    message: ReplicaSet "deployment-test-65b49fdf48" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  observedGeneration: 1
+  readyReplicas: 3
+  replicas: 3
+  terminatingReplicas: 0
+  updatedReplicas: 3
+
+
+  Fernando@Negra MINGW64 /d/Programacion/kubernetes/curso-k8s/kubernetes/deployment (main)
+$ kubectl get rs deployment-test-65b49fdf48 -o yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  annotations:
+    deployment.kubernetes.io/desired-replicas: "3"
+    deployment.kubernetes.io/max-replicas: "4"
+    deployment.kubernetes.io/revision: "1"
+  creationTimestamp: "2026-07-26T03:05:53Z"
+  generation: 1
+  labels:
+    app: front
+    pod-template-hash: 65b49fdf48
+  name: deployment-test-65b49fdf48
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: Deployment
+    name: deployment-test
+    uid: f2d2953d-322a-4108-a724-7f0a22c58f71
+  resourceVersion: "6659"
+  uid: 7fb05a12-29f1-49a0-9d92-78e0dffaabbc
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: front
+      pod-template-hash: 65b49fdf48
+  template:
+    metadata:
+      labels:
+        app: front
+        pod-template-hash: 65b49fdf48
+    spec:
+      containers:
+      - image: nginx:alpine
+        imagePullPolicy: IfNotPresent
+        name: nginx
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+status:
+  availableReplicas: 3
+  fullyLabeledReplicas: 3
+  observedGeneration: 1
+  readyReplicas: 3
+  replicas: 3
+  terminatingReplicas: 0
+
+
+
+  Fernando@Negra MINGW64 /d/Programacion/kubernetes/curso-k8s/kubernetes/deployment (main)
+$ kubectl get pod deployment-test-65b49fdf48-2d5wh -o yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2026-07-26T03:05:53Z"
+  generateName: deployment-test-65b49fdf48-
+  generation: 1
+  labels:
+    app: front
+    pod-template-hash: 65b49fdf48
+  name: deployment-test-65b49fdf48-2d5wh
+  namespace: default
+  ownerReferences:
+  - apiVersion: apps/v1
+    blockOwnerDeletion: true
+    controller: true
+    kind: ReplicaSet
+    name: deployment-test-65b49fdf48
+    uid: 7fb05a12-29f1-49a0-9d92-78e0dffaabbc
+  resourceVersion: "6647"
+  uid: e39b1444-5aa4-43b8-82d5-094431b692f1
+spec:
+  containers:
+  - image: nginx:alpine
+    imagePullPolicy: IfNotPresent
+    name: nginx
+    ports:
+    - containerPort: 80
+      protocol: TCP
+    resources: {}
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-5gsnb
+      readOnly: true
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  nodeName: minikube
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Always
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: kube-api-access-5gsnb
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2026-07-26T03:06:33Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodReadyToStartContainers
+  - lastProbeTime: null
+    lastTransitionTime: "2026-07-26T03:05:54Z"
+    observedGeneration: 1
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2026-07-26T03:06:33Z"
+    observedGeneration: 1
+    status: "True"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2026-07-26T03:06:33Z"
+    observedGeneration: 1
+    status: "True"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2026-07-26T03:05:53Z"
+    observedGeneration: 1
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: docker://54f599fcd6acb78576382fd9ab4b838816399317114c9df34af13f30d386a8a6
+    image: nginx:alpine
+    imageID: docker-pullable://nginx@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752
+    lastState: {}
+    name: nginx
+    ready: true
+    resources: {}
+    restartCount: 0
+    started: true
+    state:
+      running:
+        startedAt: "2026-07-26T03:06:30Z"
+    volumeMounts:
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-5gsnb
+      readOnly: true
+      recursiveReadOnly: Disabled
+  hostIP: 192.168.49.2
+  hostIPs:
+  - ip: 192.168.49.2
+  observedGeneration: 1
+  phase: Running
+  podIP: 10.244.0.3
+  podIPs:
+  - ip: 10.244.0.3
+  qosClass: BestEffort
+  startTime: "2026-07-26T03:05:54Z"
+
+
+
+#Video 48
+
