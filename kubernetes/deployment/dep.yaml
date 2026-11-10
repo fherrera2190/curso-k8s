@@ -1,12 +1,15 @@
 #Se puede ver en kubectl api-resources que el apiVersion apps/v1 es la version estable de Deployment, y que se encuentra en el grupo apps.
 apiVersion: apps/v1
 kind: Deployment
-
 metadata:
   name: deployment-test
   labels:
     app: front
+  # Annotations
+  annotations:
+    kubernetes.io/change-cause: "test fake"
 spec:
+  # revisionHistoryLimit: 1
   replicas: 3
   selector:
     matchLabels:
@@ -18,6 +21,14 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx:alpine
+        # image: nginx:alpine
+        image: nginx:fake
         ports:
-        - containerPort: 80
+        - containerPort: 101
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m"
+          limits:
+            memory: "256Mi"
+            cpu: "500m"
