@@ -1,221 +1,236 @@
-IPC inter process comunication
+# Curso Kubernetes - Comandos y Conceptos
 
-Sirve para compartir informacion entre procesos
+## Conceptos Fundamentales
 
-Procesos de un contenedor no puede ver los procesos de otro contenedor
+### Namespaces de Linux
 
-CGROUPS (control groups)
-Sirve para limitar los recursos de los contenedores
-Ram, cpu, i/o
+- **IPC (Inter-Process Communication)**: Sirve para compartir información entre procesos. Los procesos de un contenedor no pueden ver los procesos de otro contenedor.
+- **CGROUPS (Control Groups)**: Sirve para limitar los recursos de los contenedores (RAM, CPU, I/O).
+- **Network**: Cada contenedor tiene su propia network namespace con una IP única.
+- **Mount**: Cada contenedor tiene su propio filesystem. El mount permite que los contenedores compartan archivos entre sí, a menos que se compartan volumes.
+- **PID**: Cada proceso tiene su propio ID de proceso.
+- **USER**: Namespace de usuario.
+- **UTS (Unix Time Sharing)**: Cada contenedor tiene su propio hostname.
 
-Network
-Cada contenedor tiene su propia network namespace
-Tiene una ip unica
+### Kubernetes: El Pod
 
-Mount 
-Cada contenedor tiene su propio filesystem
-El mount permite que los contenedores compartan archivos entre si
-a menos que se compartan volumes
+En Kubernetes la unidad mínima de ejecución es el **Pod**.
 
-PID 
-Cada proceso tiene su propio id de proceso
+**¿Por qué?**
+Porque un pod puede tener múltiples contenedores y estos comparten recursos (IPC, Network y UTS).
 
-USER
+### LXC (Linux Containers)
 
-UTS Unix Time Sharing
-Cada contenedor tiene su propio hostname
+Antes de Docker existía LXC. Cada contenedor es un LXC y cada uno tiene:
+- Su propia red
+- Su propio filesystem
+- Su propio proceso
+- Su propio usuario
+- Su propio hostname
+- Su propio mount
+- Su propio PID
+- Su propio IPC
+- Su propio cgroup
+- Su propio network namespace
+- Su propio user namespace
+- Su propio UTS namespace
+- Su propio cgroup namespace
+- Su propio time namespace
 
+A raíz de esto nació Docker e incluyó bridge network.
 
-En kubernetes la unidad minima de ejecucion es el pod
+### Pod en Kubernetes
 
-Porque?
-
-Por que un pod puede tener multiples contenedores y estos comparten recursos
-
-LXC (Linux Containers) Antes de docker
-
-Cada contenedor es un lxc y cadana uno de ellos tiene su propia red, su propio filesystem, su propio proceso, su propio usuario, su propio hostname, su propio mount, su propio pid, su propio ipc, su propio cgroup, su propio network namespace, su propio user namespace, su propio uts namespace, su propio cgroup namespace, su propio time namespace, su propio cgroup namespace, su propio time namespace
-
-A raiz de eso nacio docker e incluyo bridge network
-
-Pod 
-es compartir namespace entre contenedores
-kubernetes compart IPC Network y UTS
-
-
-
-#minikube status
-
-#minikube start
-
-#kubectl get pods
-
-##Crear pods cli
-
-#kubectl run name --image=nginx:alpine se puede agregar puerto , sino por defecto 8080
-
-#Describir pod
-#kubectl describe pod name
-
-#kubectl get po (shortname)
-
-Ver todo
-#kubectl api-resources
-
-borrar pods
-#kubectl delete pod name name2 name3
-
-ver pod seleccionado
-#kubectl get pod name
-
-obtener manifest
-#kubectl get pod name -o yaml/json
-
-#kubectl describe pod podtest 
-
-#docker ps -l
-
-#docker ps -f=name=gcr.io/k8s-minikube/kicbase:v0.0.48
+El Pod es compartir namespace entre contenedores. Kubernetes comparte IPC, Network y UTS.
 
 
-#kubectl port-forward <pod-name> 7000:<pod-port>
+## Comandos Básicos
 
-nginx:alpine por defautl usa el puerto 80 -> #kubectl port-forward <pod-name> 7000:80
+### Minikube
+```bash
+minikube status
+minikube start
+```
 
-Video 32
+### Kubectl - Pods
+```bash
+# Listar pods
+kubectl get pods
+kubectl get po  # shortname
 
-Acceder a la terminal del contenedor
-# kubectl exec -ti podtest -- sh
+# Crear pod por CLI
+kubectl run name --image=nginx:alpine  # se puede agregar puerto, sino por defecto 8080
 
+# Describir pod
+kubectl describe pod name
+
+# Ver todos los recursos disponibles
+kubectl api-resources
+
+# Borrar pods
+kubectl delete pod name name2 name3
+
+# Ver pod específico
+kubectl get pod name
+
+# Obtener manifest
+kubectl get pod name -o yaml
+kubectl get pod name -o json
+
+# Port forwarding
+kubectl port-forward <pod-name> 7000:<pod-port>
+# nginx:alpine por defecto usa el puerto 80
+kubectl port-forward <pod-name> 7000:80
+```
+
+### Docker
+```bash
+docker ps -l
+docker ps -f=name=gcr.io/k8s-minikube/kicbase:v0.0.48
+```
+
+## Video 32 - Acceder a Terminal del Contenedor
+
+```bash
+kubectl exec -ti podtest -- sh
 cd /usr/share/nginx/html/
-
 cat index.html
-
 echo ":)" > index.html
-
 cat index.html
+```
 
+## Video 33 - Logs
 
-# kubectl exec -ti podtest -- sh
-
-Video 33
-
+```bash
 kubectl logs podtest
 
-Para ver en vivo los logs
-
+# Ver logs en vivo
 kubectl logs -f podtest
+```
 
+## Video 34 - YAML y API Versions
 
-Video 34
-
+```bash
 kubectl api-versions
 
-#En la carpeta kubernetes/pods
+# En la carpeta kubernetes/pods
 kubectl apply -f pod.yaml
-
 kubectl delete -f pod.yaml
+```
 
+## Video 35 - Múltiples Contenedores
 
-Video 35
-
-Linux
+### Docker
+```bash
+# Linux
 docker run --net host -ti python:3.6-alpine sh
 
-Window
+# Windows
 docker run -p 8081:8081 -ti python:3.6-alpine sh
 
-# python -m http.server 8081
+# Dentro del contenedor
+python -m http.server 8081
+```
 
+### Kubernetes
+```bash
 kubectl apply -f doscontenedores.yaml
-
 kubectl events pod doscontenedores
-
 kubectl logs doscontenedores -c cont1
 kubectl logs doscontenedores -c cont2
+```
 
-#Video 36
+## Video 36 - Comunicación entre Contenedores
 
+```bash
 kubectl logs doscontenedores -c cont2
 kubectl exec -ti doscontenedores -- sh
 
-#instalar curl
+# Instalar curl
 apk add -U curl
-
 curl localhost:8082
 
+# Recrear pod
 kubectl delete -f doscontenedores.yaml
 kubectl apply -f doscontenedores.yaml
+```
 
-#Seleccionar default
+### Seleccionar Contenedor Específico
+```bash
+# Seleccionar default
 kubectl exec -it doscontenedores -- sh
-#Seleccionar contenedor
+
+# Seleccionar contenedor específico
 kubectl exec -it doscontenedores -c cont1 -- sh
 
 apk add -U curl
 curl localhost:8082
 curl localhost:8083
+```
 
-#Video 37
+## Video 37 - Labels
 
+```bash
 kubectl apply -f labels.yaml
 kubectl get pods -l app=front
 kubectl get pods -l app=back
 kubectl get pods -l env=dev
+```
 
-#Video 38
-Problemas
+## Video 38 - Problemas de los Pods
 
-los pods no hacen self healing
-los pods no pueden actualizarse a si mismos
+**Problemas:**
+- Los pods no hacen self healing
+- Los pods no pueden actualizarse a sí mismos
 
+```bash
 kubectl apply -f test.yaml
+```
 
-solucion crear objeto replicaset
+**Solución:** Crear objeto ReplicaSet
 
-#Video 39 (replicaset)
+## Video 39 - ReplicaSet: Cómo Funciona
 
-Como funcionan?
+Es un objeto separado al pod que está a un nivel más alto, el cual crea pods y los gestiona.
 
-Es un objeto separado al pod que esta a un nivel mas alto el cual crea pods y los gestiona
+- Se define un template y la cantidad de réplicas que quiero
+- Si un pod muere, el replicaset lo reemplaza
+- Los labels son importantes para que el replicaset pueda identificar los pods
+- Cuando el replicaset crea los pods, va a colocar en la metadata del pod **owner reference** que es el replicaset que lo creó
+- El owner lo coloca el objeto de más alto nivel
 
-se define un template y la cantidad de replicas que quiero
+## Video 40 - ReplicaSet: Estructura
 
-Si un pod muere el replicaset lo reemplaza
-
-los labels son importante para que el replicaset pueda identificar los pods
-
-Cuando el replicaset crea los pods, va a colocar en la metadata del pod ownwer reference que es el replicaset que lo creo
-
-El owner lo coloca el objeto de mas alto nivel
-
-#Video 40 (replicaset)
-
-tiene 
+```yaml
 apiVersion: apps/v1
+```
 
-por que API Group es apps
+**¿Por qué API Group es apps?**
+- El `kind` es el tipo de objeto
 
-el kind es el tipo de objeto
-
+```bash
 kubectl api-resources
-
 kubectl apply -f rs.yaml
+```
 
-#Video 41 (replicaset)
+## Video 41 - ReplicaSet: Eliminar Pods
 
-
+```bash
 kubectl delete pod XXXXX
 kubectl apply -f rs.yaml
+```
 
-#Video 42 (replicaset)
+## Video 42 - ReplicaSet: Inspección
 
+```bash
 kubectl describe rs rs -o yaml
 kubectl get rs -o yaml
 kubectl get pod rs-test-7mxsr -o yaml
+```
 
-#Video 43 (replicaset)
+## Video 43 - ReplicaSet: Adopción de Pods
 
+```bash
 kubectl delete -f rs.yaml
 
 kubectl run podtest1 --image=nginx:alpine
@@ -225,68 +240,98 @@ kubectl label pods podtest1 app=pod-label
 kubectl label pods podtest2 app=pod-label
 
 kubectl apply -f rs.yaml
+```
 
-replicaset adopta los pods existentes
+El replicaset adopta los pods existentes.
 
+```bash
 kubectl delete pod podtest2
+```
 
-#Video 44 (Problemas replicaset)
+## Video 44 - Problemas del ReplicaSet
 
-Replica set debe mantener la cantidad de pods especificada
+**Problema:** ReplicaSet debe mantener la cantidad de pods especificada. ¿Qué pasa si quiero cambiar la imagen o hacer cambios en el pod?
 
-Que pasa si quiero cambiar la imagen? o quiero hacer cambios en el pod?
+**Limitación:**
+- El replicaset solo mira el número de pods y el label
+- Si se requieren cambios, no se puede editar el replicaset, se debe eliminar y crear uno nuevo
 
-
-El replicaset solo mira el numero de pods y el label
-
-Si se requieren cambios no se puede editar el replicaset, se debe eliminar y crear uno nuevo
-
+```bash
 kubectl get pods
-
 kubectl get rs rs-test -o yaml
-
 kubectl describe pod rs-test-f85zp
+```
 
-Replicaset no sirve para actualizar los pods, pero si podria eliminarlos y volver a crear
+**Conclusión:** ReplicaSet no sirve para actualizar los pods, pero sí podría eliminarlos y volver a crear.
 
-Solucion a esto es el objeto de mayor nivel "deployment"
-deployment->replicaset->pods
+**Solución:** El objeto de mayor nivel es el **Deployment**
+
+```
+deployment -> replicaset -> pods
+```
 
 
-#Video46
+## Video 46 - Deployment
+
+```bash
+# Muestra todos los recursos disponibles
 kubectl api-resources
 
 kubectl apply -f dep.yaml
 
 kubectl get deployment
 
-# 
+# Muestra los deployments con sus labels
 kubectl get deployment --show-labels
 
-# Sirve 
- kubectl rollout status deployment deployment-test
+# Sirve para ver el estado del rollout
+kubectl rollout status deployment deployment-test
 
-#Video47
+# Muestra el historial de versiones del deployment
+kubectl rollout history deployment deployment-test
+```
 
-Fernando@Negra MINGW64 /d/Programacion/kubernetes/curso-k8s/kubernetes/deployment (main)
-$ kubectl get rs
+## Video 47 - Inspección de Deployment
+
+### Ver ReplicaSets
+```bash
+kubectl get rs
+```
+**Output:**
+```
 NAME                         DESIRED   CURRENT   READY   AGE
 deployment-test-65b49fdf48   3         3         3       6m35s
+```
 
-Fernando@Negra MINGW64 /d/Programacion/kubernetes/curso-k8s/kubernetes/deployment (main)
-$ kubectl get rs --show-labels
+### Ver ReplicaSets con Labels
+```bash
+kubectl get rs --show-labels
+```
+**Output:**
+```
 NAME                         DESIRED   CURRENT   READY   AGE     LABELS
 deployment-test-65b49fdf48   3         3         3       6m53s   app=front,pod-template-hash=65b49fdf48
+```
 
-$ kubectl get pods --show-labels
+### Ver Pods con Labels
+```bash
+kubectl get pods --show-labels
+```
+**Output:**
+```
 NAME                               READY   STATUS    RESTARTS   AGE     LABELS
 deployment-test-65b49fdf48-2d5wh   1/1     Running   0          7m32s   app=front,pod-template-hash=65b49fdf48
 deployment-test-65b49fdf48-d9lnv   1/1     Running   0          7m32s   app=front,pod-template-hash=65b49fdf48
 deployment-test-65b49fdf48-d9zzq   1/1     Running   0          7m32s   app=front,pod-template-hash=65b49fdf48
+```
 
+### Ver Deployment YAML
+```bash
+kubectl get deployment deployment-test -o yaml
+```
 
-Fernando@Negra MINGW64 /d/Programacion/kubernetes/curso-k8s/kubernetes/deployment (main)
-$ kubectl get  deployment deployment-test -o yaml
+**Output:**
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -354,10 +399,15 @@ status:
   replicas: 3
   terminatingReplicas: 0
   updatedReplicas: 3
+```
 
+### Ver ReplicaSet YAML
+```bash
+kubectl get rs deployment-test-65b49fdf48 -o yaml
+```
 
-  Fernando@Negra MINGW64 /d/Programacion/kubernetes/curso-k8s/kubernetes/deployment (main)
-$ kubectl get rs deployment-test-65b49fdf48 -o yaml
+**Output:**
+```yaml
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:
@@ -415,11 +465,15 @@ status:
   readyReplicas: 3
   replicas: 3
   terminatingReplicas: 0
+```
 
+### Ver Pod YAML
+```bash
+kubectl get pod deployment-test-65b49fdf48-2d5wh -o yaml
+```
 
-
-  Fernando@Negra MINGW64 /d/Programacion/kubernetes/curso-k8s/kubernetes/deployment (main)
-$ kubectl get pod deployment-test-65b49fdf48-2d5wh -o yaml
+**Output:**
+```yaml
 apiVersion: v1
 kind: Pod
 metadata:
@@ -538,7 +592,7 @@ status:
     - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
       name: kube-api-access-5gsnb
       readOnly: true
-      recursiveReadOnly: Disabled
+    recursiveReadOnly: Disabled
   hostIP: 192.168.49.2
   hostIPs:
   - ip: 192.168.49.2
@@ -549,8 +603,116 @@ status:
   - ip: 10.244.0.3
   qosClass: BestEffort
   startTime: "2026-07-26T03:05:54Z"
+```
 
+## Video 48
 
+kubectl rollout status deployment deployment-test
 
-#Video 48
+## Video 49
+
+$ kubectl get rs -l app=front
+NAME                         DESIRED   CURRENT   READY   AGE
+deployment-test-6c64f866cb   3         3         3       44m
+deployment-test-7784486fc7   0         0         0       42m
+deployment-test-78bbbbc89b   0         0         0       83m
+deployment-test-c564f8455    0         0         0       86m
+
+$ kubectl rollout history deployment deployment-test
+deployment.apps/deployment-test 
+REVISION  CHANGE-CAUSE
+2         <none>
+3         <none>
+5         <none>
+6         <none>
+
+## Video 50
+
+### 3 formas de dejar comentarios en un kubectl rollout status deployment deployment-test al realizar un rollout 
+
+1- kubectl apply -f dep.yaml --record 
+
+2- Agregar a archivo dep.yaml
+
+```yaml
+  annotations:
+    kubernetes.io/change-cause: "Change port to 101"
+```
+3- kubectl annotate deployment deployment-test kubernetes.io/change-cause="Change port to 101"
+
+kubectl rollout history deployment deployment-test --revision=1
+
+## Video 51 
+
+### Rollback
+
+kubectl rollout undo deployment deployment-test --to-revision=3
+
+### Verificar el rollback
+kubectl describe deployments.apps deployment-test
+
+## Video 54 Services
+
+### Los servicios son una forma de exporar aplicaciones dentro del cluster, la ip de los servicios no cambian
+
+### Los endpoints guardan la información de los pods que están ejecutando la aplicación IP
+
+### Los servicios se crean con el comando kubectl expose
+
+kubectl apply -f service.yml
+
+kubectl get svc
+
+kubectl port-forward svc/mi-servicio 8080:8080
+
+# Ejecutar en otra terminal desde toolbox para alt-services
+for i in $(seq 1 100000); do wget -qO- --header="Connection: close" http://nginx-balance-svc; done
+
+# Video 55
+
+kubectl get svc
+
+kubectl get svc -l app=front
+
+kubectl describe svc mi-servicio
+
+# Video 56
+
+kubectl get ep mi-servicio
+
+kubectl get pods -l app=front
+
+kubectl get pods -l app=front -o wide
+
+kubectl delete pod deployment-test-7784486fc7-9ccsc
+
+kubectl run podtest2 --image=nginx:alpine
+
+kubectl get ep mi-servicio -o wide
+
+kubectl describe ep mi-servicio
+
+# Video 57
+
+kubectl exec -it toolbox-deployment-59f55f59f-lvjsc --sh
+
+### dns
+
+curl mi-servicio:8080
+
+# Video 58
+
+ClusterIP es el tipo de servicio que expone la aplicación dentro del cluster
+esta ip es virtual del cluster y no es accesible desde fuera del cluster
+
+# Video 59
+
+NodePort: expone la aplicación en un puerto específico del nodo
+
+minikube service mi-servicio-nodeport --url
+
+# Video 60
+
+LoadBalancer: expone la aplicación en un puerto específico del nodo y crea un balanceador de carga
+
 
