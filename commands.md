@@ -716,3 +716,9 @@ minikube service mi-servicio-nodeport --url
 LoadBalancer: expone la aplicación en un puerto específico del nodo y crea un balanceador de carga
 
 
+# Video 63
+
+docker run --rm -dti -v $PWD/:/go --net host --name goland golang bash
+
+CMD
+docker run --rm -dti -v //c/Users/20352675688/Desktop/devops/curso-k8s/kubernetes/k8s-hands-on/backend/src:/go -p 8080:8080 --name goland golang bash
