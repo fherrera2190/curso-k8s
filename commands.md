@@ -721,4 +721,21 @@ LoadBalancer: expone la aplicación en un puerto específico del nodo y crea un 
 docker run --rm -dti -v $PWD/:/go --net host --name goland golang bash
 
 CMD
-docker run --rm -dti -v //c/Users/20352675688/Desktop/devops/curso-k8s/kubernetes/k8s-hands-on/backend/src:/go -p 8080:8080 --name goland golang bash
+docker run --rm -dti -v //c/Users/20352675688/Desktop/devops/curso-k8s/kubernetes/k8s-hands-on/backend/src:/go -p 8080:8080 --name goland golang sh
+
+
+# Video 68
+
+docker build -t backend-go:latest .
+
+
+minikube image load backend-go:latest
+
+minikube service backend-k8s-hands-on
+
+kubectl port-forward svc/backend-k8s-hands-on 8080:80
+
+# Video 70
+
+kubectl run podtest3 --rm -it --image=nginx:alpine -- sh
+
